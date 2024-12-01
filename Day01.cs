@@ -9,22 +9,36 @@ namespace AdventCode2024
     public class Day01
     {
         private static readonly string day = System.Reflection.MethodBase.GetCurrentMethod()!.DeclaringType!.Name.ToLower();
-        readonly IEnumerable<string> values = Utils.FromFile<string>($"{day}.txt");
+        readonly int[][] values = Utils.FromCSVFile<int>($"{day}.txt", " ").TransposeArray();
 
         [TestMethod]
         public void Problem1()
-        {           
-            int result = 0;
+        {
+            var (left, right, _) = values;
 
-            Assert.AreEqual(result, 4267809);            
+            var result = Sort(left)
+                .Zip(Sort(right))
+                .Sum(p => Math.Abs(p.First - p.Second));
+
+            Assert.AreEqual(result, 1223326);
+            return;
+
+            int[] Sort(int[] input) => input
+                .Select((v, i) => (value: v, index: i))
+                .OrderBy(p => p.value)
+                .ThenBy(p => p.index).Select(p => p.value).ToArray();
         }
-
+        
         [TestMethod]
         public void Problem2()
         {
-            int result = 0;
+            var (left, right, _) = values;
+            var leftGroup =left.GroupBy(x => x);
+            var rightGroup = right.GroupBy(x => x);
+            
+            long result = leftGroup.Sum(g => g.Key * g.Count() * rightGroup.FirstOrDefault(g2 => g2.Key == g.Key)?.Count() ?? 0);
 
-            Assert.AreEqual(result, 4267809);
+            Assert.AreEqual(result, 21070419);
         }
     }
 }

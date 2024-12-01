@@ -335,6 +335,19 @@ namespace AdventCode2024
 
         public static int FirstIndex<T>(this IEnumerable<T> input, Func<T, bool> predicate) => input.Select((value, index) => (value, index)).Where(p => predicate(p.value)).Select(p => p.index).DefaultIfEmpty(-1).First();
 
+        public static IEnumerable<TAcc> Scan<T, TAcc>(this IEnumerable<T> seq, Func<TAcc, T, TAcc> f, TAcc initial)
+        {
+            TAcc current = initial;
+            yield return current;
+            foreach(T item in seq)
+            {
+                current = f(current, item);
+                yield return current;
+            }
+        }
+
+        public static T[][] TransposeArray<T>(this T[][] array) => Enumerable.Range(0, array[0].Length).Select(index => array.Select(v => v[index]).ToArray()).ToArray();
+
 
         /// <summary>
         /// Uses factorial notation to give all permutations of input set.
