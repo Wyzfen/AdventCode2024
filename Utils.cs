@@ -331,7 +331,7 @@ namespace AdventCode2024
 
     public static class LinqExtensions
     {        
-        public static IEnumerable<IEnumerable<T>> Sliding<T>(this IEnumerable<T> input, int length) => Enumerable.Range(length, input.Count() - length).Select(i => input.Skip(i - length).Take(length));
+        public static IEnumerable<IEnumerable<T>> Sliding<T>(this IEnumerable<T> input, int length) => Enumerable.Range(length, input.Count() - 1).Select(i => input.Skip(i - length).Take(length));
 
         public static int FirstIndex<T>(this IEnumerable<T> input, Func<T, bool> predicate) => input.Select((value, index) => (value, index)).Where(p => predicate(p.value)).Select(p => p.index).DefaultIfEmpty(-1).First();
 
