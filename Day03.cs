@@ -11,20 +11,17 @@ namespace AdventCode2024
     public class Day03
     {
         private static readonly string day = System.Reflection.MethodBase.GetCurrentMethod()!.DeclaringType!.Name.ToLower();
-        private readonly string values = String.Join("", Utils.FromFile<string>($"{day}.txt").ToArray());
+        private readonly string values = File.ReadAllText($"{day}.txt");
 
         private string test = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
             
-        private static Regex regex = new Regex(@"mul\((\d{1,3}),(\d{1,3})\)");
-
         [TestMethod]
         public void Problem1()
         {
             Regex regex = new Regex(@"mul\((\d{1,3}),(\d{1,3})\)");
 
-            var x = regex.Match(test);
             int result = regex.Matches(values)
-                .Sum(m => int.Parse(m.Groups[1].Value) * int.Parse(m.Groups[2].Value));
+                              .Sum(m => int.Parse(m.Groups[1].Value) * int.Parse(m.Groups[2].Value));
 
             Assert.AreEqual(result, 167090022);
         }
