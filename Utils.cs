@@ -322,6 +322,8 @@ namespace AdventCode2024
         }
 
         public Vector2 Size => new (Width, Height);
+        
+        public bool InBounds(Vector2 point) => point.X >= 0 && point.X < Width && point.Y >= 0 && point.Y < Height;
     }
 
     public static class VectorExtensions
