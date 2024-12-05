@@ -227,18 +227,23 @@ namespace AdventCode2024
         }
     }
 
-    public class MultiMap<V> : Dictionary<string, List<V>>
+    public class MultiMap<TKey, TValue> : Dictionary<TKey, List<TValue>> where TKey : notnull
     {
-        public void Add(string key, V value)
+        public MultiMap(IEnumerable<(TKey key, TValue value)> pairs)
+        {
+            foreach(var pair in pairs) Add(pair.key, pair.value);    
+        }
+        
+        public void Add(TKey key, TValue value)
         {
             // Add a key.
-            if (TryGetValue(key, out List<V> list))
+            if (TryGetValue(key, out List<TValue> list))
             {
                 list.Add(value);
             }
             else
             {
-                Add(key, new List<V> { value });
+                Add(key, new List<TValue> { value });
             }
         }
     }
@@ -347,6 +352,8 @@ namespace AdventCode2024
                 yield return current;
             }
         }
+
+        public static MultiMap<TKey, TValue> ToMultiMap<TKey, TValue>(this IEnumerable<(TKey, TValue)> pairs) where TKey: notnull => new (pairs);
 
         public static T[][] TransposeArray<T>(this T[][] array) => Enumerable.Range(0, array[0].Length).Select(index => array.Select(v => v[index]).ToArray()).ToArray();
 
