@@ -63,7 +63,7 @@ namespace AdventCode2024
                 if (!page.SequenceEqual(sorted)) result += sorted[page.Length/ 2];
             }
 
-            Assert.AreEqual(result, 3062);    // too high       
+            Assert.AreEqual(result, 3062);      
         }
     }
 }
