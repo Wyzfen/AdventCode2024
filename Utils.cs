@@ -252,8 +252,13 @@ namespace AdventCode2024
     public record struct Vector2(int X, int Y)
     {
         public static Vector2 operator +(Vector2 a, Vector2 b) => new(a.X + b.X, a.Y + b.Y);
+
+        public static Vector2 operator -(Vector2 a, Vector2 b) => new(a.X - b.X, a.Y - b.Y);
+
         public static Vector2 operator %(Vector2 a, Vector2 b) => new((a.X + b.X) % b.X, (a.Y + b.Y) % b.Y);
         public static Vector2 operator *(Vector2 a, int b) => new(a.X * b, a.Y * b);
+        
+        public static Vector2 Sign(Vector2 vector) => new(Math.Sign(vector.X), Math.Sign(vector.Y));
         
         public static Vector2 One { get; } = new Vector2(1, 1);
         public static Vector2 Zero { get; } = new Vector2(0, 0);
@@ -261,6 +266,17 @@ namespace AdventCode2024
         public static Vector2 Down { get; } = new Vector2(0, 1);
         public static Vector2 Left { get; } = new Vector2(-1, 0);
         public static Vector2 Right { get; } = new Vector2(1, 0);
+
+        public static IEnumerable<Vector2> Interpolate(Vector2 from, Vector2 to)
+        {
+            var delta = Sign(to - from);
+            var current = from;
+            while (current != to)
+            {
+                yield return current;
+                current += delta;
+            }
+        }
     }
 
     public class Vector2Converter : TypeConverter
@@ -421,9 +437,9 @@ namespace AdventCode2024
             }
         }
 
-        public static IEnumerable<T> Generate<T>(T value, Func<T, T> func)
+        public static IEnumerable<T> Generate<T>(T value, Func<T, T> func, Func<T, bool>? predicate = null)
         {
-            while (true)
+            while (predicate?.Invoke(value) ?? true)
             {
                 yield return value;
                 value = func(value);
