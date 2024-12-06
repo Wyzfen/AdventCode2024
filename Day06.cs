@@ -76,6 +76,32 @@ namespace AdventCode2024
                 _ => Vector2.Down
             };
         }
+
+        private static Vector2 GetObstruction(string [] values, Vector2 location, Vector2 direction,
+            Rectangle bounds, Vector2? extra = null)
+        {
+            int x = location.X;
+            int y = location.Y;
+            
+            switch (direction)
+            {
+                case (_, -1):
+                    while (y >= 0 && values[y][x] != '#' && (extra?.X != x  || extra?.Y != y) ) y--;
+                    break;
+                case (_, 1):
+                    while (y < bounds.Height && values[y][x] != '#'&& (extra?.X != x  || extra?.Y != y)) y++;
+                    break;
+                case (-1, _):
+                    while (x >= 0 && values[y][x] != '#'&& (extra?.X != x  || extra?.Y != y)) x--;
+                    break;
+                case (1, _):
+                    while (x < bounds.Width && values[y][x] != '#'&& (extra?.X != x  || extra?.Y != y)) x++;
+                    break;
+            }
+            
+            return new Vector2(x, y);
+        }
+        
         
 
         private static Vector2 RotateRight(Vector2 input) => new (-input.Y, input.X);
@@ -94,7 +120,7 @@ namespace AdventCode2024
 
             while(true)
             {
-                var obstruction = GetObstruction(obstructions, current, direction, bounds);
+                var obstruction = GetObstruction(values, current, direction, bounds);
 
                 path.UnionWith(Vector2.Interpolate(current, obstruction));
                 if (!bounds.InBounds(obstruction)) break;
@@ -113,7 +139,6 @@ namespace AdventCode2024
             var values = this.values;
             var bounds = new Rectangle(0, 0, values[0].Length, values.Length);
             
-            var obstructions = GetObstructions(values);
             var startLocation = FindGuard(values);
             var startDirection = Direction(values, startLocation);
 
@@ -124,7 +149,7 @@ namespace AdventCode2024
 
             while(true)
             {
-                var obstruction = GetObstruction(obstructions, current, direction, bounds);
+                var obstruction = GetObstruction(values, current, direction, bounds);
 
                 path.UnionWith(Vector2.Interpolate(current, obstruction));
                 if (!bounds.InBounds(obstruction)) break;
@@ -137,7 +162,7 @@ namespace AdventCode2024
             
             foreach(var step in path)
             {
-                obstructions.Add(step);
+                //obstructions.Add(step);
                 
                 current = startLocation;
                 direction = startDirection;
@@ -154,14 +179,14 @@ namespace AdventCode2024
                     }
                     waypoints.Add(newWaypoint);
                     
-                    var obstruction = GetObstruction(obstructions, current, direction, bounds);
+                    var obstruction = GetObstruction(values, current, direction, bounds, step);
                     if (!bounds.InBounds(obstruction)) break;
                     
                     current = obstruction - direction;
                     direction = RotateRight(direction);
                 }
                 
-                obstructions.Remove(step);
+                //obstructions.Remove(step);
             }
 
             Assert.AreEqual(result, 2188);            
