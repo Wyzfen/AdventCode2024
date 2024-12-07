@@ -65,8 +65,8 @@ namespace AdventCode2024
         public static IEnumerable<long> LongsFromFile(string filename) =>
             File.ReadAllLines(filename, Encoding.UTF8).Select(s => long.Parse(s));
 
-        public static IEnumerable<int> IntsFromString(string input) =>
-            input.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None).Select(s => int.Parse(s));
+        public static IEnumerable<int> IntsFromString(string input, params string [] split) =>
+            input.Split(split, StringSplitOptions.RemoveEmptyEntries).Select(int.Parse);
 
         public static string [] StringsFromFile(string filename) =>
             File.ReadAllLines(filename, Encoding.UTF8);
