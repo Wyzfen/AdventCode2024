@@ -15,7 +15,14 @@ namespace AdventCode2024
 
         private readonly string[] test = new[]
         {
-
+            "190: 10 19",
+            "3267: 81 40 27",
+            "83: 17 5",
+            "156: 15 6",
+            "7290: 6 8 6 15",
+            "161011: 16 10 13",
+            "192: 17 8 14",
+            "21037: 9 7 18 13",
             "292: 11 6 16 20"
         };
 
@@ -69,23 +76,21 @@ namespace AdventCode2024
 
                 foreach (var (target, values) in inputs)
                 {
-                    var count = 1 << (2 * (values.Length - 1));
-
-                    for (int p = 0; p < count; p++)
+                    var count = (int) Math.Pow(3, values.Length - 1);
+                    for (var p = 0; p < count; p++)
                     {
                         ulong output = (ulong)values[0];
 
+                        int j = p;
                         for (int i = 1; i < values.Length; i++)
                         {
-                            int q = 3 << 2 * (i - 1);
-                            int v = (p & q) >> ((i - 1) * 2);
-                            output = v switch
+                            output = (j % 3) switch
                             {
                                 0 => output * (ulong)values[i],
                                 1 => output + (ulong)values[i],
                                 2 => ulong.Parse(output.ToString() + values[i]),
-                                _ => 0
                             };
+                            j /= 3;   
 
                             if (output > target || output == 0) break;
                         }
