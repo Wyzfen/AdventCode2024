@@ -26,9 +26,9 @@ namespace AdventCode2024
             "292: 11 6 16 20"
         };
 
-        IEnumerable<(ulong target, int[] values)> ParseValues(IEnumerable<string> input) =>
+        IEnumerable<(long target, int[] values)> ParseValues(IEnumerable<string> input) =>
             input
-                .Select<string, (ulong target, string values)>(value => Utils.FromString<ulong, string>(value, ":"))
+                .Select<string, (long target, string values)>(value => Utils.FromString<long, string>(value, ":"))
                 .Select(x => (x.target, Utils.IntsFromString(x.values, " ")
                     .ToArray()));
 
@@ -37,7 +37,7 @@ namespace AdventCode2024
         {
             checked
             {
-                ulong result = 0;
+                long result = 0;
                 var inputs = ParseValues(values);
 
                 foreach (var (target, values) in inputs)
@@ -45,12 +45,12 @@ namespace AdventCode2024
                     var count = 1 << (values.Length - 1);
                     for (int p = 0; p < count; p++)
                     {
-                        ulong output = (ulong)values[0];
+                        long output = (long)values[0];
 
                         for (int i = 1; i < values.Length; i++)
                         {
                             int q = 1 << (i - 1);
-                            output = (p & q) == 0 ? output * (ulong)values[i] : output + (ulong)values[i];
+                            output = (p & q) == 0 ? output * (long)values[i] : output + (long)values[i];
                             if (output > target) break;
                         }
 
@@ -62,7 +62,7 @@ namespace AdventCode2024
                     }
                 }
 
-                Assert.AreEqual(result, 945512582195u);
+                Assert.AreEqual(result, 945512582195);
             }
         }
 
@@ -71,7 +71,7 @@ namespace AdventCode2024
         {
             checked
             {
-                ulong result = 0;
+                long result = 0;
                 var inputs = ParseValues(values);
 
                 foreach (var (target, values) in inputs)
@@ -79,16 +79,16 @@ namespace AdventCode2024
                     var count = (int) Math.Pow(3, values.Length - 1);
                     for (var p = 0; p < count; p++)
                     {
-                        ulong output = (ulong)values[0];
+                        long output = (long)values[0];
 
                         int j = p;
                         for (int i = 1; i < values.Length; i++)
                         {
                             output = (j % 3) switch
                             {
-                                0 => output * (ulong)values[i],
-                                1 => output + (ulong)values[i],
-                                2 => ulong.Parse(output.ToString() + values[i]),
+                                0 => output * (long)values[i],
+                                1 => output + (long)values[i],
+                                2 => long.Parse(output.ToString() + values[i]),
                             };
                             j /= 3;   
 
@@ -103,7 +103,28 @@ namespace AdventCode2024
                     }
                 }
 
-                Assert.AreEqual(result, 271691107779347u);
+                Assert.AreEqual(result, 271691107779347);
+            }
+        }
+
+        [TestMethod]
+        public void Problem2b()
+        {
+            checked
+            {
+                bool Recurse(long target, IEnumerable<int> values, long current)
+                {
+                    if (current > target || !values.Any()) return current == target;
+                    var next = values.First();
+                    return Recurse(target, values.Skip(1), current * next) ||
+                           Recurse(target, values.Skip(1), current + next) ||
+                           Recurse(target, values.Skip(1), long.Parse(current.ToString() + next));
+                }
+
+                
+                var inputs = ParseValues(values);
+                long result = inputs.Select(v => Recurse(v.target, v.values.Skip(1), v.values.First()) ? v.target : 0u).Sum();
+                Assert.AreEqual(result, 271691107779347);
             }
         }
     }
