@@ -255,6 +255,8 @@ namespace AdventCode2024
 
         public static Vector2 operator -(Vector2 a, Vector2 b) => new(a.X - b.X, a.Y - b.Y);
 
+        public static Vector2 operator -(Vector2 a) => new(-a.X, -a.Y);
+
         public static Vector2 operator %(Vector2 a, Vector2 b) => new((a.X + b.X) % b.X, (a.Y + b.Y) % b.Y);
         public static Vector2 operator *(Vector2 a, int b) => new(a.X * b, a.Y * b);
         

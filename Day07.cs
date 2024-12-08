@@ -116,9 +116,10 @@ namespace AdventCode2024
                 {
                     if (current > target || !values.Any()) return current == target;
                     var next = values.First();
-                    return Recurse(target, values.Skip(1), current * next) ||
-                           Recurse(target, values.Skip(1), current + next) ||
-                           Recurse(target, values.Skip(1), long.Parse(current.ToString() + next));
+                    var rest = values.Skip(1);
+                    return Recurse(target, rest, current * next) ||
+                           Recurse(target, rest, current + next) ||
+                           Recurse(target, rest, long.Parse(current.ToString() + next));
                 }
 
                 
