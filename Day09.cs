@@ -18,7 +18,7 @@ namespace AdventCode2024
 
 
 
-        (List<FileIndex> files, List<FileIndex> empty) GetFiles(int [] filelist)
+        (List<FileIndex> files, List<FileIndex> free) GetFiles(int [] filelist)
         {
             var files = new List<FileIndex>();
             var empty = new List<FileIndex>();
@@ -51,55 +51,39 @@ namespace AdventCode2024
             {
                 long result = 0;
 
-                var (files, empty) = GetFiles(values);
+                var (files, free) = GetFiles(values);
 
-                //var debug = new StringBuilder(new string('.', files.Sum(f => f.Length)));
-
-                int emptyID = 0;
-                int count = empty[emptyID].Length;
-                int i = empty[emptyID].Index;    
+                IEnumerator<FileIndex> freeSpace = free.GetEnumerator();
+                freeSpace.MoveNext();
+                var (index, count) = freeSpace.Current;
                 
-                for (int fileID = files.Count - 1; fileID >= 0; fileID--)
+                for (int fileId = files.Count - 1; fileId >= 0; fileId--)
                 {
-                    int fileLength = files[fileID].Length;
+                    int fileLength = files[fileId].Length;
+                    
+                    for(; fileLength > 0; fileLength--)
+                    {
+                        if (index >= files[fileId].Index) break;
+                        
+                        result += index++ * fileId;
 
-                    if (emptyID >= empty.Count || empty[emptyID].Index >= files[fileID].Index)
-                    {                                
-                        emptyID = empty.Count;
-                        i = files[fileID].Index;
+                        if (--count == 0 && freeSpace.MoveNext())
+                        {
+                            (index, count) = freeSpace.Current;
+                        }
                     }
                     
-                    while (fileLength > 0)
+                    if (fileLength > 0) // Ran out of space to the left - checksum in place
                     {
-                        //debug[i] = (char)('0' + fileID); 
-                        result += i * fileID;
-
-                        fileLength--;
-                        count--;
-                        
-                        if(fileLength >= 0) i++;
-                        
-                        if (count == 0)
+                        index = files[fileId].Index;
+                        for (; fileLength > 0; fileLength--, index++)
                         {
-                            emptyID++;
-                            if (emptyID < empty.Count && empty[emptyID].Index < files[fileID].Index)
-                            {
-                                count = empty[emptyID].Length;
-                                i = empty[emptyID].Index;    
-                            }
-                            else
-                            {
-                                emptyID = empty.Count;
-                                count = -1;
-                                i = files[fileID].Index;
-                            }
+                            result += index * fileId;
                         }
                     }
                 }
 
-                //Console.WriteLine(debug.ToString());
-                Assert.AreEqual(result, 1928); //4851270996170 is too low   6341711076053 is too high  
-                //                                                          6341711049568 is wrong
+                Assert.AreEqual(result, 6341711060162);
             }
         }
 
