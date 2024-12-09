@@ -57,26 +57,20 @@ namespace AdventCode2024
 
             for (int fileId = files.Count - 1; fileId >= 0; fileId--)
             {
-                int fileLength = files[fileId].Length;
+                var (fileIndex, fileLength) = files[fileId];
 
                 for (; fileLength > 0; fileLength--)
                 {
-                    if (index >= files[fileId].Index) break;
+                    if (index >= fileIndex)
+                    {
+                        index = fileIndex + fileLength - 1;
+                    }
 
                     result += index++ * fileId;
 
                     if (--count == 0 && freeSpace.MoveNext())
                     {
                         (index, count) = freeSpace.Current;
-                    }
-                }
-
-                if (fileLength > 0) // Ran out of space to the left - checksum in place
-                {
-                    index = files[fileId].Index;
-                    for (; fileLength > 0; fileLength--, index++)
-                    {
-                        result += index * fileId;
                     }
                 }
             }
