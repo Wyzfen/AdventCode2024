@@ -42,21 +42,18 @@ namespace AdventCode2024
             }.SelectMany(v => v).ToArray();
         }
 
-        private static Vector2[][] FindTrailheads(string[] values)
+        private static IEnumerable<Vector2[]> FindTrailheads(string[] values)
         {
-            List<Vector2 []> result = [];
             for (int y = 0; y < values.Length; y++)
             {
                 for (int x = 0; x < values[0].Length; x++)
                 {
                     if (values[y][x] == '0')
                     {
-                        result.Add(Recurse(values, x, y, 0));
+                        yield return Recurse(values, x, y, 0);
                     }
                 }
             }
-            
-            return result.ToArray();
         }
         
         [TestMethod]
