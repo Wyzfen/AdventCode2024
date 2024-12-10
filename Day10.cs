@@ -23,39 +23,28 @@ namespace AdventCode2024
             "10456732",
         };
         
-        private static Vector2 [] Recurse(string [] values, int x, int y, int target)
+        private static Vector2 [] Recurse(string [] values, Vector2 location, int target)
         {
-            if (x < 0 || x >= values[0].Length || y < 0 || y >= values.Length) return [];
-                
-            int value = values[y][x] - '0';
-                
-            if (value != target) return [];
-            if (target == 9) return [new Vector2(x, y)];
+            if (!location.InBounds(values)) return [];
+            if (values.IndexBy(location) - '0' != target) return [];
+            if (target == 9) return [location];
                 
             target++;
 
-            return new []{
-                    Recurse(values, x, y + 1, target),
-                    Recurse(values, x, y - 1, target), 
-                    Recurse(values, x + 1, y, target),
-                    Recurse(values, x - 1, y, target)
-            }.SelectMany(v => v).ToArray();
+            return Utils.ExecuteWith<Vector2, Vector2 []>(
+                    v => Recurse(values, v, target),
+                        location + Vector2.Down, 
+                        location + Vector2.Up,
+                        location + Vector2.Right,
+                        location + Vector2.Left)
+                .SelectMany(v => v).ToArray();
         }
 
-        private static IEnumerable<Vector2[]> FindTrailheads(string[] values)
-        {
-            for (int y = 0; y < values.Length; y++)
-            {
-                for (int x = 0; x < values[0].Length; x++)
-                {
-                    if (values[y][x] == '0')
-                    {
-                        yield return Recurse(values, x, y, 0);
-                    }
-                }
-            }
-        }
-        
+        private static IEnumerable<Vector2[]> FindTrailheads(string[] values) 
+            => values.IterateStringArray()
+                .Where(v => v.character == '0')
+                .Select(v => Recurse(values, v.location, 0));
+
         [TestMethod]
         public void Problem1()
         {           

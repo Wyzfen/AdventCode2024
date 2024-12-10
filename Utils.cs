@@ -225,6 +225,38 @@ namespace AdventCode2024
 
             return result;
         }
+        
+        public static T[][] TransposeArray<T>(this T[][] array) => Enumerable.Range(0, array[0].Length).Select(index => array.Select(v => v[index]).ToArray()).ToArray();
+
+        public static IEnumerable<(Vector2 location, T item)> Iterate2DArray<T>(this T[][] array)
+        {
+            for (int y = 0; y < array.Length; y++)
+            {
+                for (int x = 0; x < array[y].Length; x++)
+                {
+                    yield return (new Vector2(x, y), array[y][x]);
+                }
+            }
+        }
+        
+        public static IEnumerable<(Vector2 location, char character)> IterateStringArray(this string[] array)
+        {
+            for (int y = 0; y < array.Length; y++)
+            {
+                for (int x = 0; x < array[y].Length; x++)
+                {
+                    yield return (new Vector2(x, y), array[y][x]);
+                }
+            }
+        }
+        
+        public static IEnumerable<U> ExecuteWith<T, U>(Func<T, U> func, params T [] elements) => elements.Select(func);
+        
+        public static T IndexBy<T>(this T [][] array, Vector2 v) => array[v.Y][v.X]; 
+        public static T IndexBy<T>(this T [][][] array, Vector3 v) => array[v.Z][v.Y][v.X]; 
+        
+        public static char IndexBy(this string [] array, Vector2 v) => array[v.Y][v.X]; 
+        public static char IndexBy(this string [][] array, Vector3 v) => array[v.Z][v.Y][v.X]; 
     }
 
     public class MultiMap<TKey, TValue> : Dictionary<TKey, List<TValue>> where TKey : notnull
@@ -279,6 +311,10 @@ namespace AdventCode2024
                 current += delta;
             }
         }
+        
+        public bool InBounds<T>(T [][] array) => array.Length > 0 && X >= 0 && X < array[0].Length && Y >= 0 && Y < array.Length;
+        public bool InBounds(string [] array) => array.Length > 0 && X >= 0 && X < array[0].Length && Y >= 0 && Y < array.Length;
+
     }
 
     public class Vector2Converter : TypeConverter
@@ -372,9 +408,6 @@ namespace AdventCode2024
         }
 
         public static MultiMap<TKey, TValue> ToMultiMap<TKey, TValue>(this IEnumerable<(TKey, TValue)> pairs) where TKey: notnull => new (pairs);
-
-        public static T[][] TransposeArray<T>(this T[][] array) => Enumerable.Range(0, array[0].Length).Select(index => array.Select(v => v[index]).ToArray()).ToArray();
-
 
         /// <summary>
         /// Uses factorial notation to give all permutations of input set.
