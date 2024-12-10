@@ -41,40 +41,35 @@ namespace AdventCode2024
                     Recurse(values, x - 1, y, target)
             }.SelectMany(v => v).ToArray();
         }
-        
-        [TestMethod]
-        public void Problem1()
-        {           
-            int result = 0;
+
+        private static Vector2[][] FindTrailheads(string[] values)
+        {
+            List<Vector2 []> result = [];
             for (int y = 0; y < values.Length; y++)
             {
                 for (int x = 0; x < values[0].Length; x++)
                 {
                     if (values[y][x] == '0')
                     {
-                        result += Recurse(values, x, y, 0).Distinct().Count();
+                        result.Add(Recurse(values, x, y, 0));
                     }
                 }
             }
-
+            
+            return result.ToArray();
+        }
+        
+        [TestMethod]
+        public void Problem1()
+        {           
+            int result = FindTrailheads(values).Select(v => v.Distinct().Count()).Sum();
             Assert.AreEqual(result, 644);            
         }
 
         [TestMethod]
         public void Problem2()
         {           
-            int result = 0;
-            for (int y = 0; y < values.Length; y++)
-            {
-                for (int x = 0; x < values[0].Length; x++)
-                {
-                    if (values[y][x] == '0')
-                    {
-                        result += Recurse(values, x, y, 0).Count();
-                    }
-                }
-            }
-
+            int result = FindTrailheads(values).Select(v => v.Length).Sum();
             Assert.AreEqual(result, 1366);            
         }
     }
