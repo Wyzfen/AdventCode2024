@@ -257,6 +257,46 @@ namespace AdventCode2024
         
         public static char IndexBy(this string [] array, Vector2 v) => array[v.Y][v.X]; 
         public static char IndexBy(this string [][] array, Vector3 v) => array[v.Z][v.Y][v.X]; 
+        
+        public static int Length(this ulong n)
+        {
+            if (n <= 0) return 0;
+            if (n < 10L) return 1;
+            if (n < 100L) return 2;
+            if (n < 1000L) return 3;
+            if (n < 10000L) return 4;
+            if (n < 100000L) return 5;
+            if (n < 1000000L) return 6;
+            if (n < 10000000L) return 7;
+            if (n < 100000000L) return 8;
+            if (n < 1000000000L) return 9;
+            if (n < 10000000000L) return 10;
+            if (n < 100000000000L) return 11;
+            if (n < 1000000000000L) return 12;
+            if (n < 10000000000000L) return 13;
+            if (n < 100000000000000L) return 14;
+            if (n < 1000000000000000L) return 15;
+            if (n < 10000000000000000L) return 16;
+            if (n < 100000000000000000L) return 17;
+            if (n < 1000000000000000000L) return 18;
+            if (n < 10000000000000000000UL) return 19;
+            return 20;
+        }
+        
+        public static int Length(this uint n) // only for positive numbers
+        {
+            if (n <= 0) return 0;
+            if (n < 10) return 1;
+            if (n < 100) return 2;
+            if (n < 1000) return 3;
+            if (n < 10000) return 4;
+            if (n < 100000) return 5;
+            if (n < 1000000) return 6;
+            if (n < 10000000) return 7;
+            if (n < 100000000) return 8;
+            if (n < 1000000000) return 9;
+            return 10;
+        }
     }
 
     public class MultiMap<TKey, TValue> : Dictionary<TKey, List<TValue>> where TKey : notnull
