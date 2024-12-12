@@ -258,6 +258,11 @@ namespace AdventCode2024
         public static char IndexBy(this string [] array, Vector2 v) => array[v.Y][v.X]; 
         public static char IndexBy(this string [][] array, Vector3 v) => array[v.Z][v.Y][v.X]; 
         
+        public static bool InBounds<T>(this T [][] array, int x, int y) => array.Length > 0 && x >= 0 && x < array[0].Length && y>= 0 && y < array.Length;
+
+        public static bool InBounds<T>(this T [][] array, Vector2 v) => v.InBounds(array);
+
+        
         public static int Length(this ulong n)
         {
             if (n <= 0) return 0;
