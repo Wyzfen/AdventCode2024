@@ -228,6 +228,9 @@ namespace AdventCode2024
         
         public static T[][] TransposeArray<T>(this T[][] array) => Enumerable.Range(0, array[0].Length).Select(index => array.Select(v => v[index]).ToArray()).ToArray();
 
+        public static string[] Transpose(this string[] array) => Enumerable.Range(0, array[0].Length).Select(index => new string(array.Select(v => v[index]).ToArray())).ToArray();
+        public static string[] Rotate(this string[] array) => Enumerable.Range(0, array[0].Length).Select(index => new string(array.Select(v => v[v.Length - 1 - index]).ToArray())).ToArray();
+
         public static IEnumerable<(Vector2 location, T item)> Iterate2DArray<T>(this T[][] array)
         {
             for (int y = 0; y < array.Length; y++)

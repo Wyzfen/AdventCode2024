@@ -8,10 +8,13 @@ namespace AdventCode2024
     [TestClass]
     public class Day12
     {
-        private static readonly string day = System.Reflection.MethodBase.GetCurrentMethod()!.DeclaringType!.Name.ToLower();
-        readonly string [] values = Utils.StringsFromFile($"{day}.txt");
+        private static readonly string day = System.Reflection.MethodBase.GetCurrentMethod()!.DeclaringType!.Name
+            .ToLower();
 
-        private readonly string [] test = {
+        readonly string[] values = Utils.StringsFromFile($"{day}.txt");
+
+        private readonly string[] test =
+        {
             "RRRRIICCFF",
             "RRRRIICCCF",
             "VVRRRCCFFF",
@@ -33,25 +36,38 @@ namespace AdventCode2024
             "OOOOO",
         };
         
-        private static IEnumerable<(int perimeter, int area)> GetFences(string[] input)
+        private readonly string[] test3 =
+        {
+            "EEEEE",
+            "EXXXX",
+            "EEEEE",
+            "EXXXX",
+            "EEEEE",
+        };
+        
+        private static IEnumerable<(int perimeter, int area, int sections)> GetFences(string[] input)
         {
             char [][] data = input.Select(line => line.ToCharArray()).ToArray();
-            
+
             foreach(var (location, item) in data.Iterate2DArray().Where(d => d.item <= 'Z'))
             {
-                yield return FloodFill(location, item, ref data);
+                yield return FloodFill(location, item, data);
             }
         }
 
-        private static (int perimeter, int area) FloodFill(Vector2 location, char item, ref char[][] data)
+        private static (int perimeter, int area, int sections) FloodFill(Vector2 location, char item, char[][] data)
         {
-            bool IsValid(int x, int y, char[][] data) => data.InBounds(x, y) && data[y][x] == item;
+            char GetValue(int x, int y) => data.InBounds(x, y) ? data[y][x] : '.';
+            bool IsTarget(int x, int y) => GetValue(x, y) == item;
+            bool IsTargetPlus(int x, int y) => (GetValue(x, y) & ~32) == item;
+
             
-            if (!IsValid(location.X, location.Y, data)) return (0, 0);
+            if (!IsTarget(location.X, location.Y)) return (0, 0, 0);
 
             var altItem = (char)(item + 32);
             var perimeter = 0;
             var area = 0;
+            var sections = 0;
             
             var unvisited = new Queue<Vector2>();
             unvisited.Enqueue(location);
@@ -59,48 +75,70 @@ namespace AdventCode2024
             while (unvisited.Count > 0)
             {
                 var (x, y) = unvisited.Dequeue();
-                if(!IsValid(x, y, data)) continue; // could have visited something in this span
+                if(!IsTarget(x, y)) continue; // could have visited something in this span
                 
                 var lx = x - 1;
                 perimeter += 2;
                 
-                while (IsValid(lx, y, data))
+                while (IsTarget(lx, y))
                 {
                     data[y][lx] = altItem;
                     area++;
                     lx--;
                 }
+                
+                if( !IsTargetPlus(lx + 1, y - 1) || 
+                     IsTargetPlus(lx, y - 1)) sections++;
 
-                while(IsValid(x, y, data))
+                while(IsTarget(x, y))
                 {
                     data[y][x] = altItem;
                     area++;
                     x++;
                 }
+                
+                if( !IsTargetPlus(x - 1, y - 1) ||
+                     IsTargetPlus(x, y - 1)) sections++;
 
-                Scan(lx + 1, x - 1, y + 1, data);
-                Scan(lx + 1, x - 1, y - 1, data);
+
+                Scan(lx + 1, x - 1, y + 1);
+                Scan(lx + 1, x - 1, y - 1);
             }
             
-            //Console.WriteLine($"{item} @ {location} ->  area: {area}, perimeter: {perimeter} = {perimeter * area}");
-            return (perimeter, area);
+            Console.WriteLine($"{item} @ {location} ->  area: {area}, perimeter: {perimeter}, sections: {sections} = {perimeter * area} or {sections * area}");
+            return (perimeter, area, sections);
 
-            void Scan(int sx, int ex, int y, char [][] data)
+            void Scan(int sx, int ex, int y)
             {
                 var added = false;
+                bool inSection = false;
                 
                 for (int x = sx; x <= ex; x++)
                 {
-                    if (!IsValid(x, y, data))
+                    if (!IsTarget(x, y))
                     {
                         added = false;
-                        if(!data.InBounds(x, y) || data[y][x] != altItem) perimeter++;
+                        inSection = true;
+                        if (GetValue(x, y) != altItem)
+                        {
+                            perimeter++;
+                        }
                     }
                     else if (!added)
                     {
+                        if (inSection)
+                        {
+                            inSection = false;
+                        //    sections++;
+                        }
                         unvisited.Enqueue(new Vector2(x, y));
                         added = true;
                     }
+                }
+                
+                if (inSection)
+                {
+                  //  sections++;
                 }
             }
         }
@@ -116,9 +154,9 @@ namespace AdventCode2024
         [TestMethod]
         public void Problem2()
         {
-            int result = 0;
-
-            Assert.AreEqual(result, 4267809);
+            int result = GetFences(values).Sum(f => f.area * f.sections) +
+                         GetFences(values.Rotate()).Sum(f => f.area * f.sections);
+            Assert.AreEqual(result, 811148);
         }
     }
 }
