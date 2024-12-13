@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AdventCode2024
@@ -185,6 +186,9 @@ namespace AdventCode2024
             rest = list.Skip(2).ToList();
         }
 
+        public static (T, T, T) ToTuple3<T>(this IList<T> list) => (list[0], list[1], list[2]);
+        public static (T, T) ToTuple2<T>(this IList<T> list) => (list[0], list[1]);
+
         public static string FromAlphabet6(string[] input, char set = '#', char unset = '.')
         {
             if (input == null || input.Length != 6) return "";
@@ -331,6 +335,8 @@ namespace AdventCode2024
     [TypeConverter(typeof(Vector2Converter))]
     public record struct Vector2(int X, int Y)
     {
+        private static Regex regex = new Regex(@"^[^\d]*(?<x>\d+)[^\d]+(?<y>\d+)$");
+
         public static Vector2 operator +(Vector2 a, Vector2 b) => new(a.X + b.X, a.Y + b.Y);
 
         public static Vector2 operator -(Vector2 a, Vector2 b) => new(a.X - b.X, a.Y - b.Y);
@@ -363,10 +369,70 @@ namespace AdventCode2024
         public bool InBounds<T>(T [][] array) => array.Length > 0 && X >= 0 && X < array[0].Length && Y >= 0 && Y < array.Length;
         public bool InBounds(string [] array) => array.Length > 0 && X >= 0 && X < array[0].Length && Y >= 0 && Y < array.Length;
 
+        public static Vector2 Parse(string str)
+        {
+            var match = regex.Match(str);
+            if (match.Groups["x"].Success && match.Groups["y"].Success)
+            {
+                return new Vector2(int.Parse(match.Groups["x"].Value), int.Parse(match.Groups["y"].Value));
+            }
+            
+            return Zero;
+        }
+    }
+    
+    public record struct Vector2Long(long X, long Y)
+    {
+        private static Regex regex = new Regex(@"^[^\d]*(?<x>\d+)[^\d]+(?<y>\d+)$");
+
+        public static Vector2Long operator +(Vector2Long a, Vector2Long b) => new(a.X + b.X, a.Y + b.Y);
+
+        public static Vector2Long operator -(Vector2Long a, Vector2Long b) => new(a.X - b.X, a.Y - b.Y);
+
+        public static Vector2Long operator -(Vector2Long a) => new(-a.X, -a.Y);
+
+        public static Vector2Long operator %(Vector2Long a, Vector2Long b) => new((a.X + b.X) % b.X, (a.Y + b.Y) % b.Y);
+        public static Vector2Long operator *(Vector2Long a, long b) => new(a.X * b, a.Y * b);
+        
+        public static Vector2Long Sign(Vector2Long vector) => new(Math.Sign(vector.X), Math.Sign(vector.Y));
+        
+        public static Vector2Long One { get; } = new Vector2Long(1, 1);
+        public static Vector2Long Zero { get; } = new Vector2Long(0, 0);
+        public static Vector2Long Up { get; } = new Vector2Long(0, -1);
+        public static Vector2Long Down { get; } = new Vector2Long(0, 1);
+        public static Vector2Long Left { get; } = new Vector2Long(-1, 0);
+        public static Vector2Long Right { get; } = new Vector2Long(1, 0);
+
+        public static IEnumerable<Vector2Long> Interpolate(Vector2Long from, Vector2Long to)
+        {
+            var delta = Sign(to - from);
+            var current = from;
+            while (current != to)
+            {
+                yield return current;
+                current += delta;
+            }
+        }
+        
+        public bool InBounds<T>(T [][] array) => array.Length > 0 && X >= 0 && X < array[0].Length && Y >= 0 && Y < array.Length;
+        public bool InBounds(string [] array) => array.Length > 0 && X >= 0 && X < array[0].Length && Y >= 0 && Y < array.Length;
+
+        public static Vector2Long Parse(string str)
+        {
+            var match = regex.Match(str);
+            if (match.Groups["x"].Success && match.Groups["y"].Success)
+            {
+                return new Vector2Long(long.Parse(match.Groups["x"].Value), long.Parse(match.Groups["y"].Value));
+            }
+            
+            return Zero;
+        }
     }
 
     public class Vector2Converter : TypeConverter
     { 
+        private static Regex regex = new Regex(@"^[^\d]*(?<x>\d+)[^\d]+(?<y>\d+)$");
+        
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(String);
         public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
         {
@@ -377,10 +443,18 @@ namespace AdventCode2024
                     (_, int x, _, int y) = Utils.FromString<string, int, string, int>(str, "=", ",");
                     return new Vector2(x, y);
                 }
-                else // 1, 2
+                // else // 1, 2
+                // {
+                //     (int x, int y) = Utils.FromString<int, int>(str, ",");
+                //     return new Vector2(x, y);
+                // }
+                else // use regex 
                 {
-                    (int x, int y) = Utils.FromString<int, int>(str, ",");
-                    return new Vector2(x, y);
+                    var match = regex.Match(str);
+                    if (match.Groups["x"].Success && match.Groups["y"].Success)
+                    {
+                        return new Vector2(int.Parse(match.Groups["x"].Value), int.Parse(match.Groups["y"].Value));
+                    }
                 }
             }
             return base.ConvertFrom(context, culture, value);
@@ -442,6 +516,19 @@ namespace AdventCode2024
     {        
         public static IEnumerable<IEnumerable<T>> Sliding<T>(this IEnumerable<T> input, int length) => Enumerable.Range(length, input.Count() - 1).Select(i => input.Skip(i - length).Take(length));
 
+        public static IEnumerable<IEnumerable<T>> Partition<T>(this IEnumerable<T> sequence, int size) {
+            List<T> partition = new List<T>(size);
+            foreach(var item in sequence) {
+                partition.Add(item);
+                if (partition.Count == size) {
+                    yield return partition;
+                    partition = new List<T>(size);
+                }
+            }
+            if (partition.Count > 0)
+                yield return partition;
+        }
+        
         public static int FirstIndex<T>(this IEnumerable<T> input, Func<T, bool> predicate) => input.Select((value, index) => (value, index)).Where(p => predicate(p.value)).Select(p => p.index).DefaultIfEmpty(-1).First();
 
         public static IEnumerable<TAcc> Scan<T, TAcc>(this IEnumerable<T> seq, Func<TAcc, T, TAcc> f, TAcc initial)
