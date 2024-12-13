@@ -118,27 +118,31 @@ namespace AdventCode2024
                     if (!IsTarget(x, y))
                     {
                         added = false;
-                        inSection = true;
+
                         if (GetValue(x, y) != altItem)
                         {
                             perimeter++;
+
+                            if (!inSection)
+                            {
+                                inSection = true;
+                                sections++;
+                            }
                         }
-                    }
-                    else if (!added)
-                    {
-                        if (inSection)
+                        else
                         {
                             inSection = false;
-                        //    sections++;
                         }
-                        unvisited.Enqueue(new Vector2(x, y));
-                        added = true;
                     }
-                }
-                
-                if (inSection)
-                {
-                  //  sections++;
+                    else
+                    {
+                        inSection = false;
+                        if (!added)
+                        {
+                            unvisited.Enqueue(new Vector2(x, y));
+                            added = true;
+                        }
+                    }
                 }
             }
         }
@@ -154,8 +158,7 @@ namespace AdventCode2024
         [TestMethod]
         public void Problem2()
         {
-            int result = GetFences(values).Sum(f => f.area * f.sections) +
-                         GetFences(values.Rotate()).Sum(f => f.area * f.sections);
+            int result = GetFences(values).Sum(f => f.area * f.sections);
             Assert.AreEqual(result, 811148);
         }
     }
