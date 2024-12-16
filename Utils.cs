@@ -309,7 +309,88 @@ namespace AdventCode2024
             if (n < 1000000000) return 9;
             return 10;
         }
+        
+        public static int[][] BreadthFirstSearch(Vector2 start, string[] values, Func<Vector2, Vector2, bool> isValid, Func<Vector2, Vector2, int>? moveCost = null)
+        {
+            var  distances = values.Select(s => s.Select(_ => int.MaxValue).ToArray()).ToArray();
+            distances[start.Y][start.X] = 0;
+
+            Vector2 [] directions = [Vector2.Up, Vector2.Right, Vector2.Down, Vector2.Left];
+
+            List<Vector2> open = [start];
+            
+            while (open.Count > 0 && open[0] is var current)
+            {
+                open.RemoveAt(0);
+                
+                var itemDistance = distances[current.Y][current.X];
+                foreach (var test in directions.Select(d => current + d))
+                {
+                    if(!test.InBounds(distances)
+                       || !isValid(test, current)) continue;
+                    
+                    var distance = moveCost?.Invoke(test, current) ?? 1;
+                    if (distances.IndexBy(test) <= itemDistance + distance) continue;
+                    
+                    distances[test.Y][test.X] = itemDistance + distance;
+                    open.RemoveAll(v => v == test);
+                    open.Add(test);
+                }
+            }
+
+            return distances;
+        }
+       
+        
+        public static int[][] BreadthFirstSearchDirection(Ray start, string[] values, Func<Ray, Ray, bool> isValid, Func<Ray, Ray, int>? moveCost = null)
+        {
+            var  distances = values.Select(s => s.Select(_ => int.MaxValue).ToArray()).ToArray();
+            distances[start.Location.Y][start.Location.X] = 0;
+
+            Vector2 [] directions = [Vector2.Up, Vector2.Right, Vector2.Down, Vector2.Left];
+
+            List<Ray> open = [start];
+            
+            while (open.Count > 0 && open[0] is var current)
+            {
+                open.RemoveAt(0);
+                
+                var itemDistance = distances[current.Location.Y][current.Location.X];
+                foreach (var test in directions.Select(d => new Ray(Location: current.Location + d, Direction: d)))
+                {
+                    if(!test.Location.InBounds(distances)
+                       || !isValid(test, current)) continue;
+                    
+                    var distance = moveCost?.Invoke(test, current) ?? 1;
+                    if (distances.IndexBy(test.Location) <= itemDistance + distance) continue;
+                    
+                    distances[test.Location.Y][test.Location.X] = itemDistance + distance;
+                    open.RemoveAll(v => v.Location == test.Location);
+                    open.Add(test);
+                }
+            }
+
+            return distances;
+        }
+        
+        public static Vector2 FindChar(this string[] values, char character)
+        {
+            for (var y = 0; y < values.Length; y++)
+            {
+                var value = values[y];
+                for (var x = 0; x < value.Length; x++)
+                {
+                    var characterValue = value[x];
+                    if (characterValue == character) return new Vector2(x, y);
+                }
+            }
+
+            return Vector2.NegativeOne;
+        }
+
     }
+    
+    public record struct Ray(Vector2 Location, Vector2 Direction);
 
     public class MultiMap<TKey, TValue> : Dictionary<TKey, List<TValue>> where TKey : notnull
     {
@@ -354,6 +435,8 @@ namespace AdventCode2024
         public static Vector2 Down { get; } = new Vector2(0, 1);
         public static Vector2 Left { get; } = new Vector2(-1, 0);
         public static Vector2 Right { get; } = new Vector2(1, 0);
+        
+        public static Vector2 NegativeOne { get; } = new Vector2(-1, -1);
 
         public static IEnumerable<Vector2> Interpolate(Vector2 from, Vector2 to)
         {
@@ -379,6 +462,11 @@ namespace AdventCode2024
             
             return Zero;
         }
+        
+        public T? Index<T>(T?[][] array) => InBounds(array) ? array[Y][X] : default;
+        public char Index(string[] array) => InBounds(array) ? array[Y][X] : default;
+        
+        public int ManhattanTo(Vector2 dest) => Math.Abs(dest.X - X) + Math.Abs(dest.Y - Y);
     }
     
     public record struct Vector2Long(long X, long Y)
