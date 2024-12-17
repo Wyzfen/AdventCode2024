@@ -13,7 +13,7 @@ namespace AdventCode2024
         private readonly Program test = new(729, 0, 0, [0, 1, 5, 4, 3, 0]);
         private readonly Program test2 = new(2024, 0, 0, [0, 3, 5, 4, 3, 0]);
 
-        private record struct Program(ulong A, ulong B, ulong C, int[] instructions)
+        private record struct Program(ulong A, ulong B, ulong C, uint[] instructions)
         {
             private enum OpCodes
             {
@@ -27,32 +27,32 @@ namespace AdventCode2024
                 cdv
             };
 
-            public IEnumerable<int> Execute() 
+            public IEnumerable<uint> Execute() 
             {
                 ulong a = A, b = B, c = C;
 
-                int Combo(int operand) =>
+                ulong Combo(uint operand) =>
                     operand switch
                     {
                         <4 => operand,
-                        4 => (int)a,
-                        5 => (int)b,
-                        6 => (int)c
+                        4 => a,
+                        5 => b,
+                        6 => c
                     };
                 
-                for(var sp = 0; sp < instructions.Length; sp += 2)
+                for(uint sp = 0; sp < instructions.Length; sp += 2)
                 {
                     var operand = instructions[sp + 1];
                     switch ((OpCodes)instructions[sp])
                     {
                         case OpCodes.adv:
-                            a >>= Combo(operand);
+                            a >>= (int)Combo(operand);
                             break;
                         case OpCodes.bxl:
-                            b ^= (ulong)operand;
+                            b ^= operand;
                             break;
                         case OpCodes.bst:
-                            b = (ulong) Combo(operand) % 8;
+                            b = Combo(operand) % 8;
                             break;
                         case OpCodes.jnz:
                             if (a != 0) sp = operand - 2;
@@ -61,13 +61,13 @@ namespace AdventCode2024
                             b ^= c;
                             break;
                         case OpCodes.@out:
-                            yield return Combo(operand) % 8;
+                            yield return (uint) (Combo(operand) % 8);
                             break;
                         case OpCodes.bdv: 
-                            b = a >> Combo(operand);
+                            b = a >> (int)Combo(operand);
                             break;
                         case OpCodes.cdv: 
-                            c = a >> Combo(operand);
+                            c = a >> (int)Combo(operand);
                             break;
                     }
                 }
@@ -83,19 +83,18 @@ namespace AdventCode2024
             Assert.AreEqual(result, "2,1,0,4,6,2,4,2,0" );
         }
 
-        //             ulong a = Convert.ToInt64("3774103210000000", 8);
-
         [TestMethod]
-        public void Problem2b()
+        public void Problem2()
         {
             var program = values;
+            List<string> results = new();
             
             void Recurse(int x, int[] input)
             {
                 if (x == input.Length)
                 {
-                    Console.WriteLine(string.Join(",", input));
-                    Assert.Fail();
+                    results.Add(string.Join("", input));
+                    return;
                 }
                 
                 var programInstructions = program.instructions[^(x+1)..];
@@ -113,24 +112,15 @@ namespace AdventCode2024
                     
                     if (items.SequenceEqual(programInstructions))
                     {
-                        Console.WriteLine($"Digit {x}, using {v} works, {str} -> {string.Join("", items)}");
                         Recurse(x + 1, input);
                     }
                 }
             }
 
             Recurse(0, new int[program.instructions.Length]);
-        }
 
-        [TestMethod]
-        public void Problem2()
-        {
-            var program = test2;
-            long length = program.instructions.Length;
-            long a = 0;
-
-            Assert.AreEqual(a, 117440); //  14892282347106 too low,
-                                        // 119138258776848 too high
+            var result = Convert.ToUInt64(results.Order().First(), 8);
+            Assert.AreEqual(result, 109685330781408u); 
         }
     }
 }
