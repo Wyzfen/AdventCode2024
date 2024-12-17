@@ -26,11 +26,9 @@ namespace AdventCode2024
                 cdv
             };
 
-            public IEnumerable<int> Execute() => Execute(A);
-            
-            public IEnumerable<int> Execute(int a)
+            public IEnumerable<int> Execute() 
             {
-                int b = B, c = C;
+                int a = A, b = B, c = C;
 
                 int Combo(int operand) =>
                     operand switch
@@ -48,7 +46,7 @@ namespace AdventCode2024
                     switch ((OpCodes)instructions[sp])
                     {
                         case OpCodes.adv:
-                            a = a / (1 << Combo(operand));
+                            a >>= Combo(operand);
                             break;
                         case OpCodes.bxl:
                             b ^= operand;
@@ -66,10 +64,10 @@ namespace AdventCode2024
                             yield return Combo(operand) % 8;
                             break;
                         case OpCodes.bdv: 
-                            b = a / (1 << Combo(operand));
+                            b = a >> Combo(operand);
                             break;
                         case OpCodes.cdv: 
-                            c = a / (1 << Combo(operand));
+                            c = a >> Combo(operand);
                             break;
                     }
                 }
@@ -86,15 +84,24 @@ namespace AdventCode2024
         }
 
         [TestMethod]
-        public void Problem2()
+        public void Problem2b()
         {
             var program = values;
+            int a = Convert.ToInt32("377410300", 8);
+            var result = string.Join(',', (program with {A = a}).Execute());
+            Assert.AreEqual(result, string.Join(',', program.instructions));
+        }
+
+        [TestMethod]
+        public void Problem2()
+        {
+            var program = test2;
             int length = program.instructions.Length;
             int a = 0;
             
             while(a < int.MaxValue)
             {
-                var inter = program.Execute(a).GetEnumerator();
+                var inter = (program with {A = a}).Execute().GetEnumerator();
                 using var inter1 = inter as IDisposable;
 
                 int index = 0;
@@ -119,7 +126,8 @@ namespace AdventCode2024
                 a++;
             }
 
-            Assert.AreEqual(a, 117440);
+            Assert.AreEqual(a, 117440); //  14892282347106 too low,
+                                        // 119138258776848 too high
         }
     }
 }
