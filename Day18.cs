@@ -34,17 +34,24 @@ namespace AdventCode2024
         {
             var input = values.ToList();
             var result = Vector2.Zero;
-
-            var output = Utils.BreadthFirstSearch(Vector2.Zero, new Vector2(71, 71), (v, _) => input.IndexOf(v) is < 0 or > 1024);
+            
+            var walls = Enumerable.Range(0, 71).Select(s => Enumerable.Range(0, 71).Select(_ => false).ToArray()).ToArray();
+            foreach (var wall in input.Take(1024))
+            {
+                walls[wall.Y][wall.X] = true;
+            }
+            
+            var output = Utils.BreadthFirstSearch(Vector2.Zero, new Vector2(71, 71), (v, _) => !walls[v.Y][v.X]);
             var path = Utils.PathFromBFS(Vector2.Zero, new Vector2(70, 70), output).ToList();
             
             for(var i = 1025; i < input.Count; i++)
             {
                 var next = input[i];
+                walls[next.Y][next.X] = true;
+                
                 if (!path.Contains(next)) continue; // only recheck the path if something blocks the current path
                 
-                output = Utils.BreadthFirstSearch(Vector2.Zero, new Vector2(71, 71),
-                    (v, _) => input.IndexOf(v) is var index && (index < 0 || index > i));
+                output = Utils.BreadthFirstSearch(Vector2.Zero, new Vector2(71, 71), (v, _) => !walls[v.Y][v.X]);
 
                 if (output[70][70] == int.MaxValue)
                 {
