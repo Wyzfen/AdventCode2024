@@ -70,7 +70,7 @@ namespace AdventCode2024
             var start = input.FindChar('S');
             var end = input.FindChar('E');
 
-            var costs = Utils.BreadthFirstSearchDirection(new Ray(start, Vector2.Right), input, (a, b) => IsValid(a, b, input), MoveCost);
+            var costs = Utils.BreadthFirstSearchDirection(new Ray(start, Vector2.Right), input.Size(), (a, b) => IsValid(a, b, input), MoveCost);
             var result = end.Index(costs);
             
             Assert.AreEqual(result, 99488);    
@@ -83,13 +83,13 @@ namespace AdventCode2024
             var start = input.FindChar('S');
             var end = input.FindChar('E');
 
-            var costs = Utils.BreadthFirstSearchDirection(new Ray(start, Vector2.Right), input, (a, b) => IsValid(a, b, input), MoveCost);
+            var costs = Utils.BreadthFirstSearchDirection(new Ray(start, Vector2.Right), input.Size(), (a, b) => IsValid(a, b, input), MoveCost);
 
             bool IsLess(Vector2 destination, Vector2 current) => 
                 (1 + current.Index(costs) % 1000 == destination.Index(costs) % 1000) 
             &&  (current.Index(costs) / 1000 >= destination.Index(costs) / 1000);
 
-            var visits = Utils.BreadthFirstSearch(end, input, IsLess);
+            var visits = Utils.BreadthFirstSearch(end, input.Size(), IsLess);
             
             
             var result = visits.Sum(s => s.Count(v => v != int.MaxValue));

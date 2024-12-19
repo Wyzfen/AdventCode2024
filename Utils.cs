@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -310,9 +311,9 @@ namespace AdventCode2024
             return 10;
         }
         
-        public static int[][] BreadthFirstSearch(Vector2 start, string[] values, Func<Vector2, Vector2, bool> isValid, Func<Vector2, Vector2, int>? moveCost = null)
+        public static int[][] BreadthFirstSearch(Vector2 start, Vector2 bounds, Func<Vector2, Vector2, bool> isValid, Func<Vector2, Vector2, int>? moveCost = null)
         {
-            var  distances = values.Select(s => s.Select(_ => int.MaxValue).ToArray()).ToArray();
+            var  distances = Enumerable.Range(0, bounds.Y).Select(s => Enumerable.Range(0, bounds.X).Select(_ => int.MaxValue).ToArray()).ToArray();
             distances[start.Y][start.X] = 0;
 
             Vector2 [] directions = [Vector2.Up, Vector2.Right, Vector2.Down, Vector2.Left];
@@ -342,9 +343,9 @@ namespace AdventCode2024
         }
        
         
-        public static int[][] BreadthFirstSearchDirection(Ray start, string[] values, Func<Ray, Ray, bool> isValid, Func<Ray, Ray, int>? moveCost = null)
+        public static int[][] BreadthFirstSearchDirection(Ray start, Vector2 bounds, Func<Ray, Ray, bool> isValid, Func<Ray, Ray, int>? moveCost = null)
         {
-            var  distances = values.Select(s => s.Select(_ => int.MaxValue).ToArray()).ToArray();
+            var  distances = Enumerable.Range(0, bounds.Y).Select(s => Enumerable.Range(0, bounds.X).Select(_ => int.MaxValue).ToArray()).ToArray();
             distances[start.Location.Y][start.Location.X] = 0;
 
             Vector2 [] directions = [Vector2.Up, Vector2.Right, Vector2.Down, Vector2.Left];
@@ -600,7 +601,16 @@ namespace AdventCode2024
     }
 
     public static class LinqExtensions
-    {        
+    {
+        public static void Increase<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, TValue add) where TValue : INumber<TValue>
+        {
+            if(dict.TryGetValue(key, out var current)) add += current;
+            dict[key] = add;
+        }
+
+        public static Vector2 Size<T>(this T[][] array) => new(array.Length > 0 ? array[0].Length : 0, array.Length);
+        public static Vector2 Size(this string[] array) => new(array.Length > 0 ? array[0].Length : 0, array.Length);
+
         public static IEnumerable<IEnumerable<T>> Sliding<T>(this IEnumerable<T> input, int length) => Enumerable.Range(length, input.Count() - 1).Select(i => input.Skip(i - length).Take(length));
 
         public static IEnumerable<IEnumerable<T>> Partition<T>(this IEnumerable<T> sequence, int size) {
