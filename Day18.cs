@@ -21,20 +21,30 @@ namespace AdventCode2024
         [TestMethod]
         public void Problem1()
         {
-            var input = test;
+            var input = values.ToList();
 
-            var output = Utils.BreadthFirstSearch(Vector2.Zero, new Vector2(7, 7), (v, _) => !input.Contains(v));
-            int result = output[6][6];
+            var output = Utils.BreadthFirstSearch(Vector2.Zero, new Vector2(71, 71), (v, _) => input.IndexOf(v) is < 0 or > 1024);
+            int result = output[70][70];
 
-            Assert.AreEqual(result, 4267809);            
+            Assert.AreEqual(result, 304);            
         }
 
         [TestMethod]
         public void Problem2()
         {
-            int result = 0;
+            var input = values.ToList();
+            var result = Vector2.Zero;
 
-            Assert.AreEqual(result, 4267809);
+            for(var i = 1025; i < input.Count; i++)
+            {
+                var output = Utils.BreadthFirstSearch(Vector2.Zero, new Vector2(71, 71), (v, _) => input.IndexOf(v) is var index && (index < 0 || index > i));
+                if (output[70][70] != int.MaxValue) continue;
+                
+                result = input[i];
+                break;
+            }
+            
+            Assert.AreEqual(result, new Vector2(50, 28));   
         }
     }
 }

@@ -318,12 +318,11 @@ namespace AdventCode2024
 
             Vector2 [] directions = [Vector2.Up, Vector2.Right, Vector2.Down, Vector2.Left];
 
-            List<Vector2> open = [start];
+            PriorityQueue<Vector2, int> open = new();
+            open.Enqueue(start, 0);
             
-            while (open.Count > 0 && open[0] is var current)
+            while (open.Count > 0 && open.Dequeue() is var current)
             {
-                open.RemoveAt(0);
-                
                 var itemDistance = distances[current.Y][current.X];
                 foreach (var test in directions.Select(d => current + d))
                 {
@@ -331,11 +330,13 @@ namespace AdventCode2024
                        || !isValid(test, current)) continue;
                     
                     var distance = moveCost?.Invoke(test, current) ?? 1;
-                    if (distances.IndexBy(test) <= itemDistance + distance) continue;
+                    var total = itemDistance + distance;
+                    if (distances.IndexBy(test) <= total) continue;
+
+                    open.Remove(element: test, out _, out _);
                     
-                    distances[test.Y][test.X] = itemDistance + distance;
-                    open.RemoveAll(v => v == test);
-                    open.Add(test);
+                    distances[test.Y][test.X] = total;
+                    open.Enqueue(test, total);
                 }
             }
 
