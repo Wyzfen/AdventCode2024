@@ -374,6 +374,20 @@ namespace AdventCode2024
 
             return distances;
         }
+
+        public static IEnumerable<Vector2> PathFromBFS(Vector2 start, Vector2 end, int[][] costs)
+        {
+            var current = end;
+            
+            Vector2 [] directions = [Vector2.Up, Vector2.Right, Vector2.Down, Vector2.Left];
+            
+            do
+            {
+                yield return current;
+
+                current = directions.Select(d => current + d).Where(costs.InBounds).OrderBy(v => costs[v.Y][v.X]).First();
+            } while (current != start);
+        }
         
         public static Vector2 FindChar(this string[] values, char character)
         {

@@ -35,13 +35,24 @@ namespace AdventCode2024
             var input = values.ToList();
             var result = Vector2.Zero;
 
+            var output = Utils.BreadthFirstSearch(Vector2.Zero, new Vector2(71, 71), (v, _) => input.IndexOf(v) is < 0 or > 1024);
+            var path = Utils.PathFromBFS(Vector2.Zero, new Vector2(70, 70), output).ToList();
+            
             for(var i = 1025; i < input.Count; i++)
             {
-                var output = Utils.BreadthFirstSearch(Vector2.Zero, new Vector2(71, 71), (v, _) => input.IndexOf(v) is var index && (index < 0 || index > i));
-                if (output[70][70] != int.MaxValue) continue;
+                var next = input[i];
+                if (!path.Contains(next)) continue; // only recheck the path if something blocks the current path
                 
-                result = input[i];
-                break;
+                output = Utils.BreadthFirstSearch(Vector2.Zero, new Vector2(71, 71),
+                    (v, _) => input.IndexOf(v) is var index && (index < 0 || index > i));
+
+                if (output[70][70] == int.MaxValue)
+                {
+                    result = input[i];
+                    break;
+                }
+                
+                path = Utils.PathFromBFS(Vector2.Zero, new Vector2(70, 70), output).ToList();
             }
             
             Assert.AreEqual(result, new Vector2(50, 28));   
