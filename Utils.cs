@@ -387,6 +387,8 @@ namespace AdventCode2024
 
                 current = directions.Select(d => current + d).Where(costs.InBounds).OrderBy(v => costs[v.Y][v.X]).First();
             } while (current != start);
+
+            yield return current;
         }
         
         public static Vector2 FindChar(this string[] values, char character)
@@ -452,6 +454,7 @@ namespace AdventCode2024
         public static Vector2 Left { get; } = new Vector2(-1, 0);
         public static Vector2 Right { get; } = new Vector2(1, 0);
         
+        public static Vector2 [] Directions = [Up, Right, Down, Left];
         public static Vector2 NegativeOne { get; } = new Vector2(-1, -1);
 
         public static IEnumerable<Vector2> Interpolate(Vector2 from, Vector2 to)

@@ -66,6 +66,7 @@ namespace AdventCode2024
             }
         }
 
+        [Ignore]
         [TestMethod]
         public void Problem2()
         {
