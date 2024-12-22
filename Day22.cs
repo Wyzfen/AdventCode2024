@@ -39,25 +39,22 @@ namespace AdventCode2024
             foreach (var item in values)
             {
                 var hashed = Enumerable.Range(0, 1999).Scan(item, (s, _) => Hash(s)).Select(v => (int)(v % 10)).ToArray();
-                var delta = hashed.SlidingWindow(2).Select(v => v.ToArray()).Select(v => v[1] - v[0]).ToArray();
+                var delta = hashed.Zip(hashed.Skip(1), (a, b) => b - a).ToArray();
 
                 var subCounts = new Dictionary<int, int>();
-                var index = 4;
-                foreach (var seq in delta.SlidingWindow(4))
+                
+                for(var i = 4; i < delta.Length; i++)
                 {
-                    var arr = seq.ToArray();
-                    var key = ((((arr[0] + 19) % 19) * 19 + 
-                                 (arr[1] + 19) % 19) * 19 + 
-                                 (arr[2] + 19) % 19) * 19 +
-                                 (arr[3] + 19) % 19;
+                    var key = ((((delta[i - 4] + 19) % 19) * 19 + 
+                                 (delta[i - 3] + 19) % 19) * 19 + 
+                                 (delta[i - 2] + 19) % 19) * 19 +
+                                 (delta[i - 1] + 19) % 19;
 
                     if (!subCounts.ContainsKey(key))
                     {
-                        subCounts[key] = hashed[index];
-                        counts.Increase(key, hashed[index]);
+                        subCounts[key] = hashed[i];
+                        counts.Increase(key, hashed[i]);
                     }
-
-                    index++; 
                 }
             }
 
