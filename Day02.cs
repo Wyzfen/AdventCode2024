@@ -62,7 +62,7 @@ namespace AdventCode2024
         public void Problem1b()
         {
             int result = values.Count(
-                v => v.Sliding(2).Select(Enumerable.ToArray)   // use a sliding window to get consecutive pairs
+                v => v.SlidingWindow(2).Select(Enumerable.ToArray)   // use a sliding window to get consecutive pairs
                       .All(pair => IsSafe(v[1] > v[0], pair[0], pair[1]))  // check that all the pairs pass
                 ); 
             Assert.AreEqual(result, 680);
@@ -116,7 +116,7 @@ namespace AdventCode2024
             int result = values.Count(v => 
                 Enumerable.Range(0, v.Length).Select((_, i) => Skip(v, i)) // Repeat the test (length) times, removing one item each time
                     .Any(
-                        vs => vs.Sliding(2).Select(Enumerable.ToArray) // use a sliding window to get consecutive pairs
+                        vs => vs.SlidingWindow(2).Select(Enumerable.ToArray) // use a sliding window to get consecutive pairs
                                 .All(pair => IsSafe(vs[1] > vs[0], pair[0], pair[1])) // check that all the pairs pass
                     ));
             Assert.AreEqual(result, 710);

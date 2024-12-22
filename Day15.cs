@@ -49,6 +49,21 @@ namespace AdventCode2024
             "v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^",
         };
         
+        private readonly string[] test3 = {
+            "##########",
+            "#........#",
+            "#........#",
+            "#...O....#",
+            "#...@....#",
+            "#........#",
+            "#........#",
+            "#........#",
+            "#........#",
+            "##########",
+            "",
+            "^",
+        };
+        
         private record struct Level(Vector2 Start, Vector2[] Walls, List<Vector2> Blocks)
         {
             public Level(string[] level) : this(
@@ -113,39 +128,61 @@ namespace AdventCode2024
         [TestMethod]
         public void Problem2()
         {
-            var (level, path) = Parse(values.ToArray());
+            // closer, but need to make sure to check double thick walls
+            
+            var (level, path) = Parse(test2.ToArray());
             level.Expand();
             var (current, walls, blocks) = level;
 
+            blocks.AddRange([new Vector2(7, 2), new Vector2(9, 2)]);
+            
             bool CanMoveBlock(Vector2 block, Vector2 direction)
             {
-                // something in this function is off
-                if (walls.Contains(block)) return false;
-                
+                if (walls.Contains(block) || walls.Contains(block + Vector2.Right)) return false;
+
                 var next = block + direction;
                 if(walls.Contains(next)) return false;
                 
-                var neighbour = next + (direction.X == 0 ? Vector2.Right : direction);  
-                if(walls.Contains(neighbour)) return false;
-               
-                var canMove = true;
-                if(blocks.Contains(next)) canMove &= CanMoveBlock(next, direction);
-                if(blocks.Contains(neighbour)) canMove &= CanMoveBlock(neighbour, direction);
+                if (direction.X == 0) // up / down - check three locations
+                {
+                    var right = next + Vector2.Right;
+                    var left = next + Vector2.Left;
 
-                return canMove;
+                    if (walls.Contains(next) || walls.Contains(right)) return false;
+                    if (blocks.Contains(next) && !CanMoveBlock(next, direction)) return false;
+                    if (blocks.Contains(right) && !CanMoveBlock(right, direction)) return false;
+                
+                    return !blocks.Contains(left) || CanMoveBlock(left, direction);
+                }
+
+                next += direction;
+                if(walls.Contains(next)) return false;
+                
+                // left / right - check one location
+                return !blocks.Contains(next) || CanMoveBlock(next, direction);
             }
 
             void MoveBlock(Vector2 block, Vector2 direction)
             {
-                var next = block + direction;
-                
-                var neighbour = next + (direction.X == 0 ? Vector2.Right : direction);  
-                if (blocks.Contains(neighbour)) MoveBlock(neighbour, direction); // move right side first, incase moving right
-                
-                if(blocks.Contains(next)) MoveBlock(next, direction);
+                if (direction.X == 0) // up / down - check three locations
+                {
+                    var next = block + direction;
+                    var right = next + Vector2.Right;
+                    var left = next + Vector2.Left;
+                    
+                    if(blocks.Contains(next)) MoveBlock(next, direction);
+                    else if(blocks.Contains(right)) MoveBlock(right, direction);
+                    
+                    if(blocks.Contains(left)) MoveBlock(left, direction);
+                }
+                else // left / right - check one location
+                {
+                    var next = block + direction * 2;
+                    if(blocks.Contains(next)) MoveBlock(next, direction);
+                }
 
                 blocks.Remove(block);
-                blocks.Add(next);
+                blocks.Add(block + direction);
             }
             
             foreach (var direction in path.Select(Direction))

@@ -374,6 +374,68 @@ namespace AdventCode2024
 
             return distances;
         }
+        
+        public record struct Node<T>(Vector2 Location, T Extra);
+        
+        public static Dictionary<Vector2, int> BreadthFirstSearch<T>(Node<T> start, 
+            Func<Node<T>, IEnumerable<Node<T>>> neighbours,
+            Func<Node<T>, Node<T>, int>? moveCost = null)
+        {
+            var  distances = new Dictionary<Vector2, int> { { start.Location, 0 } };
+            
+            var open = new PriorityQueue<Node<T>, int>();
+            open.Enqueue(start, 0);
+            
+            while (open.Count > 0 && open.Dequeue() is var current)
+            {
+                var itemDistance = distances[current.Location];
+                foreach (var test in neighbours(current))
+                {
+                    var distance = moveCost?.Invoke(test, current) ?? 1;
+                    var testDistance = distances.GetValueOrDefault(test.Location, int.MaxValue);
+                    var total = itemDistance + distance;
+                    
+                    if (testDistance <= total) continue;
+                    
+                    open.Remove(element: test, out _, out _);
+                    
+                    distances[test.Location] = total;
+                    open.Enqueue(test, total);
+                }
+            }
+
+            return distances;
+        }
+        
+        public static Dictionary<Node<T>, int> BreadthFirstSearchNodes<T>(Node<T> start, 
+            Func<Node<T>, IEnumerable<Node<T>>> neighbours,
+            Func<Node<T>, Node<T>, int>? moveCost = null)
+        {
+            var  distances = new Dictionary<Node<T>, int> { {start, 0} };
+            
+            var open = new PriorityQueue<Node<T>, int>();
+            open.Enqueue(start, 0);
+            
+            while (open.Count > 0 && open.Dequeue() is var current)
+            {
+                var itemDistance = distances[current];
+                foreach (var test in neighbours(current))
+                {
+                    var distance = moveCost?.Invoke(test, current) ?? 1;
+                    var testDistance = distances.GetValueOrDefault(current, int.MaxValue);
+                    var total = itemDistance + distance;
+                    
+                    if (testDistance <= total) continue;
+                    
+                    open.Remove(element: test, out _, out _);
+                    
+                    distances[test] = total;
+                    open.Enqueue(test, total);
+                }
+            }
+
+            return distances;
+        }
 
         public static IEnumerable<Vector2> PathFromBFS(Vector2 start, Vector2 end, int[][] costs)
         {
@@ -390,7 +452,7 @@ namespace AdventCode2024
 
             yield return current;
         }
-        
+
         public static Vector2 FindChar(this string[] values, char character)
         {
             for (var y = 0; y < values.Length; y++)
@@ -446,6 +508,7 @@ namespace AdventCode2024
         public static Vector2 operator *(Vector2 a, int b) => new(a.X * b, a.Y * b);
         
         public static Vector2 Sign(Vector2 vector) => new(Math.Sign(vector.X), Math.Sign(vector.Y));
+        public Vector2 Abs() => new(Math.Abs(X), Math.Abs(Y));
         
         public static Vector2 One { get; } = new Vector2(1, 1);
         public static Vector2 Zero { get; } = new Vector2(0, 0);
@@ -629,7 +692,10 @@ namespace AdventCode2024
         public static Vector2 Size<T>(this T[][] array) => new(array.Length > 0 ? array[0].Length : 0, array.Length);
         public static Vector2 Size(this string[] array) => new(array.Length > 0 ? array[0].Length : 0, array.Length);
 
-        public static IEnumerable<IEnumerable<T>> Sliding<T>(this IEnumerable<T> input, int length) => Enumerable.Range(length, input.Count() - 1).Select(i => input.Skip(i - length).Take(length));
+        public static IEnumerable<IEnumerable<T>> SlidingWindow<T>(this IEnumerable<T> input, int length) => Enumerable.Range(length, input.Count() - length + 1).Select(i => input.Skip(i - length).Take(length));
+
+        public static IDictionary<TKey, TValue> AddDictionaries<TKey, TValue>(this IDictionary<TKey, TValue> left, IDictionary<TKey, TValue> right) where TValue : INumber<TValue> where TKey : notnull =>  
+            left.Keys.Union(right.Keys).ToDictionary(key => key,  key => (left.TryGetValue(key, out var leftValue) ? leftValue : default)! + (right.TryGetValue(key, out var rightValue) ? rightValue : default)!);
 
         public static IEnumerable<IEnumerable<T>> Partition<T>(this IEnumerable<T> sequence, int size) {
             List<T> partition = new List<T>(size);
@@ -646,7 +712,7 @@ namespace AdventCode2024
         
         public static int FirstIndex<T>(this IEnumerable<T> input, Func<T, bool> predicate) => input.Select((value, index) => (value, index)).Where(p => predicate(p.value)).Select(p => p.index).DefaultIfEmpty(-1).First();
 
-        public static IEnumerable<TAcc> Scan<T, TAcc>(this IEnumerable<T> seq, Func<TAcc, T, TAcc> f, TAcc initial)
+        public static IEnumerable<TAcc> Scan<T, TAcc>(this IEnumerable<T> seq, TAcc initial, Func<TAcc, T, TAcc> f)
         {
             TAcc current = initial;
             yield return current;
