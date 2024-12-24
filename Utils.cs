@@ -732,27 +732,27 @@ namespace AdventCode2024
         /// </summary>
         /// <param name="set"></param>
         /// <returns></returns>
-        public static IEnumerable<List<int>> Permutations(this IEnumerable<int> set)
+        public static IEnumerable<List<T>> Permutations<T>(this IEnumerable<T> set)
         {
-            int count = set.Count();
+            var count = set.Count();
             ulong number = Utils.Factorial(count);
-            int[] factors = new int[count];
+            var factors = new int[count];
 
             for (ulong n = 0; n < number; n++)
             {
-                List<int> workingSet = new List<int>(set);
-                List<int> result = new List<int>();
+                var workingSet = new List<T>(set);
+                var result = new List<T>();
 
-                for (int i = count - 1; i >= 0; i--)
+                for (var i = count - 1; i >= 0; i--)
                 {
-                    int j = factors[i];
+                    var j = factors[i];
                     result.Add(workingSet[j]);
                     workingSet.RemoveAt(j);
                 }
 
                 yield return result;
 
-                for (int index = 1; index < count; index++)
+                for (var index = 1; index < count; index++)
                 {
                     factors[index]++;
                     if (factors[index] <= index) break;
